@@ -1,5 +1,6 @@
 #include "get_next_line.h"
 #include <stdio.h>
+#include <string.h>
 
 char	*ft_strzdup(char **s1, char *s2)
 {
@@ -100,6 +101,12 @@ char	*get_next_line(int fd)
 		if (bytes < 1)
 			break ;
 		fdarray.buffer[bytes] = 0;
+	}
+	if (fdarray.strs[fd][0])
+	{
+		line = (strdup(fdarray.strs[fd]));
+		fdarray.strs[fd][0] = 0;
+		return (line);
 	}
 	free(fdarray.strs[fd]);
 	fdarray.buffer[0] = 0;
