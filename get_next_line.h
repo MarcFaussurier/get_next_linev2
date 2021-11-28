@@ -13,6 +13,14 @@ typedef struct s_fdarray
 {
 	char		buffer[BUFFER_SIZE + 1];
 	char		*strs[FD_MAX];
+	int			is_end;
+
+	size_t	z;
+	size_t	y;
+	size_t	i;
+	int		f;
+	char	*o;
+	char	*swp;
 }				t_fdarray;
 char			*get_next_line(int fd);
 

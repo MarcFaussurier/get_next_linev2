@@ -2,88 +2,67 @@
 #include <stdio.h>
 #include <string.h>
 
-char	*ft_strzdup(char **s1, char *s2)
+void	ft_strzdup2(t_fdarray *a, char *str)
 {
-	size_t	z;
-	size_t	y;
 	size_t	i;
-	int		f;
-	int		r0;
-	char	*o;
-	char	*swp;
 
-	r0 = 0;
-	if (!*s1 && !s2[0])
+	i = 0;
+	while (str[i])
 	{
-		*s1 = malloc(1);
-		**s1 = 0;
-		r0 = 1;
-	}
-	i = 0;
-	y = 0;
-	while ((*s1)[i++])
-		y += 1;
-	i = 0;
-	while (s2[i++])
-		y += 1;
-	swp = malloc(y + 1);
-	if (!swp)
-		return (0);
-	o = malloc(y + 1);
-	if (!o)
-		return (0);
-	i = 0;
-	y = 0;
-	z = 0;
-	f = 0;
-	while ((*s1)[i])
-	{
-		if (o[y] != '\n')
+		if (a->o[a->y] != '\n')
 		{
-			o[y] = (*s1)[i];
-			if (o[y] != '\n')
-				y += 1;
+			a->o[a->y] = str[i];
+			if (a->o[a->y] != '\n')
+				a->y += 1;
 		}
-		swp[z] = (*s1)[i];
-		if (!f && (swp[z] == '\n'))
+		a->swp[a->z] = str[i];
+		if (!a->f && (a->swp[a->z] == '\n'))
 		{
-			z = 0;
-			f = 1;
+			a->z = 0;
+			a->f = 1;
 		}
 		else
-			z += 1;
+			a->z += 1;
 		i += 1;
 	}
-	i = 0;
-	while ((s2)[i])
+}
+
+char	*ft_strzdup(t_fdarray *a, int fd)
+{
+	if (!a->strs[fd])//&& !a->buffer[0])
 	{
-		if (o[y] != '\n')
-		{
-			o[y] = (s2)[i];
-			if (o[y] != '\n')
-				y += 1;
-		}
-		swp[z] = s2[i];
-		if (!f && (swp[z] == '\n'))
-		{
-			z = 0;
-			f = 1;
-		}
-		else
-			z += 1;
-		i += 1;
+		a->strs[fd] = malloc(1);
+		a->strs[fd][0] = 0;
 	}
-	swp[z] = 0;
-	s2[0] = 0;
-	free(*s1);
-	*s1 = swp;
-	if (o[y] != '\n')
+	a->i = 0;
+	a->y = 0;
+	while (a->strs[fd][a->i++])
+		a->y += 1;
+	a->i = 0;
+	while (a->buffer[a->i++])
+		a->y += 1;
+	a->swp = malloc(a->y + 1);
+	if (!a->swp)
+		return (0);
+	a->o = malloc(a->y + 1);
+	if (!a->o)
+		return (0);
+	a->y = 0;
+	a->z = 0;
+	a->f = 0;
+	ft_strzdup2(a, a->strs[fd]);
+	ft_strzdup2(a, a->buffer);
+	a->swp[a->z] = 0;
+	a->buffer[0] = 0;
+	free(a->strs[fd]);
+	a->strs[fd] = a->swp;
+	if (a->o[a->y] != '\n')
 	{
-		free(o);
+	//	free(a->o);
 		return (0);
 	}
-	o[y + 1] = 0;
-	return (o);
+	a->o[a->y + 1] = 0;
+	return (a->o);
 }
 
 char	*get_next_line(int fd)
@@ -92,9 +71,11 @@ char	*get_next_line(int fd)
 	char				*line;
 	ssize_t				bytes;
 
+	if (fd < 0)
+		return (0);
 	while (1)
 	{
-		line = ft_strzdup(&fdarray.strs[fd], fdarray.buffer);
+		line = ft_strzdup(&fdarray, fd);
 		if (line)
 			return (line);
 		bytes = read(fd, fdarray.buffer, BUFFER_SIZE);
@@ -102,13 +83,13 @@ char	*get_next_line(int fd)
 			break ;
 		fdarray.buffer[bytes] = 0;
 	}
-	if (fdarray.strs[fd][0])
+	if (!fdarray.is_end && fdarray.strs[fd][0])
 	{
-		line = (strdup(fdarray.strs[fd]));
-		fdarray.strs[fd][0] = 0;
-		return (line);
+		fdarray.is_end = 1;
+		return (fdarray.strs[fd]);
 	}
-	free(fdarray.strs[fd]);
+	//if (!fdarray.is_end)
+	//	free(fdarray.strs[fd]);
 	fdarray.buffer[0] = 0;
 	return (0);
 }
