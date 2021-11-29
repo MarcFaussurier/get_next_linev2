@@ -9,19 +9,20 @@
 # ifndef FD_MAX
 #  define FD_MAX 256
 # endif
-typedef struct s_fdarray
+typedef struct s_line
+{
+	char		*o;
+	char		*n;
+	size_t		x;
+	size_t		y;
+	size_t		z;
+	int			f;
+}				t_line;
+typedef struct s_gnl
 {
 	char		buffer[BUFFER_SIZE + 1];
 	char		*strs[FD_MAX];
-	int			is_end;
-
-	size_t	z;
-	size_t	y;
-	size_t	i;
-	int		f;
-	char	*o;
-	char	*swp;
-}				t_fdarray;
+}				t_gnl;
 char			*get_next_line(int fd);
 
 #endif

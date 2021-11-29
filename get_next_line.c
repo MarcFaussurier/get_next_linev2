@@ -1,95 +1,114 @@
+/* ************************************************************************** */
+/*                                                          LE - /            */
+/*                                                              /             */
+/*   get_next_line.c                                  .::    .:/ .      .::   */
+/*                                                 +:+:+   +:    +:  +:+:+    */
+/*   Authors: marvin                                +:+   +:    +:    +:+     */
+/*   <marvin@42lyon.fr>                            #+#   #+    #+    #+#      */
+/*                                                #+#   ##    ##    #+#       */
+/*                                               ###    #+./ #+    ###.fr     */
+/*                                                        /   UNIV -          */
+/*                                               | |  _  / ___ _ _   / |      */
+/*   Created: 2021/11/29 14:39:13 by marvin      | |_| || / _ \ ' \  | |      */
+/*   Updated: 2021/11/29 16:24:15 by marvin      |____\_, \___/_||_| |_|      */
+/*                                                    /__/            .fr     */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
+#include "string.h"
 #include <stdio.h>
-#include <string.h>
-
-void	ft_strzdup2(t_fdarray *a, char *str)
+static char		*ft_line(t_gnl *ctx, int fd, ssize_t bytes)
 {
-	size_t	i;
+	char		*o;
+	char		*n;
+	size_t		x;
+	size_t		y;
+	size_t		z;
+	int			f;
 
-	i = 0;
-	while (str[i])
+	x = 0;
+	while (ctx->strs[fd][x++]);
+	n = malloc (x + BUFFER_SIZE + 1);
+	o = malloc (x + BUFFER_SIZE + 1);
+	x = 0;
+	y = 0;
+	z = 0;
+	f = 0;
+	while (ctx->strs[fd][x])
 	{
-		if (a->o[a->y] != '\n')
+		n[y] = ctx->strs[fd][x++];
+		if (!f)
+			o[z++] = n[y];
+		if (n[y++] == '\n' && !f)
 		{
-			a->o[a->y] = str[i];
-			if (a->o[a->y] != '\n')
-				a->y += 1;
+			y = 0;
+			f = 1;
 		}
-		a->swp[a->z] = str[i];
-		if (!a->f && (a->swp[a->z] == '\n'))
-		{
-			a->z = 0;
-			a->f = 1;
-		}
-		else
-			a->z += 1;
-		i += 1;
 	}
+	x = 0;
+	while (ctx->buffer[x] > 0)
+	{
+		n[y] = ctx->buffer[x++];
+		if (!f)
+			o[z++] = n[y];
+		if (n[y++] == '\n' && !f)
+		{
+			y = 0;
+			f = 1;
+		}
+	}
+	n[y] = 0;
+	o[z] = 0;
+	free(ctx->strs[fd]);
+	ctx->strs[fd] = n;
+	if (!f)
+	{
+		if (bytes <= 0)
+		{
+			if (!o[0])
+				return 0;
+			ctx->strs[fd] = 0;
+			return strdup(n);
+		}
+		return 0;
+	}
+	return o;
 }
 
-char	*ft_strzdup(t_fdarray *a, int fd)
+static char		*ft_exit(t_gnl *ctx, int fd, char *output)
 {
-	if (!a->strs[fd])//&& !a->buffer[0])
-	{
-		a->strs[fd] = malloc(1);
-		a->strs[fd][0] = 0;
-	}
-	a->i = 0;
-	a->y = 0;
-	while (a->strs[fd][a->i++])
-		a->y += 1;
-	a->i = 0;
-	while (a->buffer[a->i++])
-		a->y += 1;
-	a->swp = malloc(a->y + 1);
-	if (!a->swp)
-		return (0);
-	a->o = malloc(a->y + 1);
-	if (!a->o)
-		return (0);
-	a->y = 0;
-	a->z = 0;
-	a->f = 0;
-	ft_strzdup2(a, a->strs[fd]);
-	ft_strzdup2(a, a->buffer);
-	a->swp[a->z] = 0;
-	a->buffer[0] = 0;
-	free(a->strs[fd]);
-	a->strs[fd] = a->swp;
-	if (a->o[a->y] != '\n')
-	{
-	//	free(a->o);
-		return (0);
-	}
-	a->o[a->y + 1] = 0;
-	return (a->o);
+
+	free(ctx->strs[fd]);
+	ctx->strs[fd] = 0;
+	ctx->buffer[0] = 0;
+	return (output);
 }
 
-char	*get_next_line(int fd)
+char			*get_next_line(int fd)
 {
-	static t_fdarray	fdarray;
-	char				*line;
+	static t_gnl		ctx;
 	ssize_t				bytes;
+	char				*line;
+	int					p;
 
-	if (fd < 0)
+	if (fd < 0 || fd > FD_MAX || BUFFER_SIZE < 1)
 		return (0);
+	if (!ctx.strs[fd])
+	{
+		ctx.strs[fd] = malloc(1);
+		ctx.strs[fd][0] = 0;
+	}
+	p = 0;
+	bytes = 1;
 	while (1)
 	{
-		line = ft_strzdup(&fdarray, fd);
-		if (line)
+		line = ft_line(&ctx, fd, bytes); // may be LAST(NO NL), LINE, LAST(NL)
+		if (!bytes || ((p) && line))
 			return (line);
-		bytes = read(fd, fdarray.buffer, BUFFER_SIZE);
-		if (bytes < 1)
-			break ;
-		fdarray.buffer[bytes] = 0;
+		p = 1;
+		bytes = read(fd, ctx.buffer, BUFFER_SIZE);
+		if (bytes >= 0)
+			ctx.buffer[bytes] = 0;
 	}
-	if (!fdarray.is_end && fdarray.strs[fd][0])
-	{
-		fdarray.is_end = 1;
-		return (fdarray.strs[fd]);
-	}
-	//if (!fdarray.is_end)
-	//	free(fdarray.strs[fd]);
-	fdarray.buffer[0] = 0;
-	return (0);
+	return (ft_exit(&ctx, fd, 0));
 }
