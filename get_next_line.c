@@ -10,7 +10,7 @@
 /*                                                        /   UNIV -          */
 /*                                               | |  _  / ___ _ _   / |      */
 /*   Created: 2021/11/29 14:39:13 by marvin      | |_| || / _ \ ' \  | |      */
-/*   Updated: 2021/11/29 16:24:15 by marvin      |____\_, \___/_||_| |_|      */
+/*   Updated: 2021/11/30 13:04:20 by marvin      |____\_, \___/_||_| |_|      */
 /*                                                    /__/            .fr     */
 /* ************************************************************************** */
 
@@ -26,6 +26,7 @@ static char		*ft_line(t_gnl *ctx, int fd, ssize_t bytes)
 	size_t		z;
 	int			f;
 
+	//printf("[%s][%s]\n", ctx->strs[fd], ctx->buffer);
 	x = 0;
 	while (ctx->strs[fd][x++]);
 	n = malloc (x + BUFFER_SIZE + 1);
@@ -46,7 +47,7 @@ static char		*ft_line(t_gnl *ctx, int fd, ssize_t bytes)
 		}
 	}
 	x = 0;
-	while (ctx->buffer[x] > 0)
+	while (ctx->buffer[x])
 	{
 		n[y] = ctx->buffer[x++];
 		if (!f)
@@ -61,15 +62,17 @@ static char		*ft_line(t_gnl *ctx, int fd, ssize_t bytes)
 	o[z] = 0;
 	free(ctx->strs[fd]);
 	ctx->strs[fd] = n;
+	ctx->buffer[0] = 0;
 	if (!f)
 	{
 		if (bytes <= 0)
 		{
-			if (!o[0])
-				return 0;
+			free(ctx->strs[fd]);
 			ctx->strs[fd] = 0;
-			return strdup(n);
+			if (o[0])
+				return o;
 		}
+		free(o);
 		return 0;
 	}
 	return o;
@@ -77,10 +80,12 @@ static char		*ft_line(t_gnl *ctx, int fd, ssize_t bytes)
 
 static char		*ft_exit(t_gnl *ctx, int fd, char *output)
 {
-
-	free(ctx->strs[fd]);
-	ctx->strs[fd] = 0;
-	ctx->buffer[0] = 0;
+	if (!output)
+	{
+		free(ctx->strs[fd]);
+		ctx->strs[fd] = 0;
+		ctx->buffer[0] = 0;
+	}
 	return (output);
 }
 
@@ -89,23 +94,22 @@ char			*get_next_line(int fd)
 	static t_gnl		ctx;
 	ssize_t				bytes;
 	char				*line;
-	int					p;
 
-	if (fd < 0 || fd > FD_MAX || BUFFER_SIZE < 1)
+	if (fd < 0 || fd > FD_MAX || BUFFER_SIZE < 1 || read(fd, 0, 0) < 0)
 		return (0);
 	if (!ctx.strs[fd])
 	{
 		ctx.strs[fd] = malloc(1);
 		ctx.strs[fd][0] = 0;
 	}
-	p = 0;
 	bytes = 1;
 	while (1)
 	{
 		line = ft_line(&ctx, fd, bytes); // may be LAST(NO NL), LINE, LAST(NL)
-		if (!bytes || ((p) && line))
-			return (line);
-		p = 1;
+		if (!bytes || line)
+			return (ft_exit(&ctx, fd, line));
+		else 
+			free(line);
 		bytes = read(fd, ctx.buffer, BUFFER_SIZE);
 		if (bytes >= 0)
 			ctx.buffer[bytes] = 0;

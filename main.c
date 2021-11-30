@@ -14,12 +14,15 @@ int main(int ac, char **av)
 		fd = open (av[i], O_RDONLY);
 		while (1)
 		{
+			//
 			str = get_next_line(fd);
 			if (!str)
 				break ;
 			printf("- %s", str);
+			free(str);
 		}
 		i += 1;
 	}
+	free(str);
 }
 
