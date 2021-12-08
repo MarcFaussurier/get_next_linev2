@@ -9,6 +9,12 @@
 # ifndef FD_MAX
 #  define FD_MAX 256
 # endif
+typedef char *t_str;
+typedef struct 
+{
+	t_str		s;
+	size_t		l;
+}				t_pstr;
 typedef struct s_line
 {
 	char		*o;

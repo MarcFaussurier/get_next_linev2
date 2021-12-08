@@ -18,7 +18,7 @@ int main(int ac, char **av)
 			str = get_next_line(fd);
 			if (!str)
 				break ;
-			printf("- %s", str);
+		printf("- %s", str);
 			free(str);
 		}
 		i += 1;
