@@ -11,7 +11,7 @@ int main(int ac, char **av)
 	i = 1;
 	while (i < ac)
 	{
-		fd = open (av[i], O_RDONLY);
+		fd = -1;//open (av[i], O_RDONLY);
 		while (1)
 		{
 			//

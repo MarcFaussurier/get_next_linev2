@@ -28,6 +28,7 @@ typedef struct s_gnl
 {
 	char		buffer[BUFFER_SIZE + 1];
 	char		*strs[FD_MAX];
+	size_t 		sizes[FD_MAX];
 }				t_gnl;
 char			*get_next_line(int fd);
 
