@@ -11,14 +11,14 @@ int main(int ac, char **av)
 	i = 1;
 	while (i < ac)
 	{
-		fd = -1;//open (av[i], O_RDONLY);
+		fd = open (av[i], O_RDONLY);
 		while (1)
 		{
-			//
 			str = get_next_line(fd);
 			if (!str)
+
 				break ;
-		printf("- %s", str);
+			printf("- %s", str);
 			free(str);
 		}
 		i += 1;

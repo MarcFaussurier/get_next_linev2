@@ -3,6 +3,8 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <limits.h>
+
+# include <stdio.h>
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 80
 # endif
@@ -10,26 +12,12 @@
 #  define FD_MAX 256
 # endif
 typedef char *t_str;
-typedef struct 
-{
-	t_str		s;
-	size_t		l;
-}				t_pstr;
-typedef struct s_line
-{
-	char		*o;
-	char		*n;
-	size_t		x;
-	size_t		y;
-	size_t		z;
-	int			f;
-}				t_line;
-typedef struct s_gnl
+typedef struct s_gnt
 {
 	char		buffer[BUFFER_SIZE + 1];
 	char		*strs[FD_MAX];
 	size_t 		sizes[FD_MAX];
-}				t_gnl;
+}				t_gnt;
 char			*get_next_line(int fd);
-
+char			*get_next_token(int fd, int (*issep)(char c) );
 #endif
