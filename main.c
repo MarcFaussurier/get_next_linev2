@@ -15,6 +15,7 @@ int main(int ac, char **av)
 		while (1)
 		{
 			str = get_next_line(fd);
+
 			if (!str)
 
 				break ;

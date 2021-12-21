@@ -9,7 +9,7 @@
 #  define BUFFER_SIZE 80
 # endif
 # ifndef FD_MAX
-#  define FD_MAX 256
+#  define FD_MAX OPEN_MAX
 # endif
 typedef char *t_str;
 typedef struct s_gnt
