@@ -3,15 +3,12 @@
 # include <unistd.h>
 # include <stdlib.h>
 # include <limits.h>
-
-# include <stdio.h>
 # ifndef BUFFER_SIZE
 #  define BUFFER_SIZE 80
 # endif
 # ifndef FD_MAX
 #  define FD_MAX OPEN_MAX
 # endif
-typedef char *t_str;
 typedef struct s_gnt
 {
 	char		buffer[BUFFER_SIZE + 1];
