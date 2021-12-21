@@ -38,7 +38,7 @@ char			*get_next_line(int fd)
 ```
 
 t_gnt is the only static variable
-- char buffer[] used by read() is also static because virtual memory is larger than plain stack one.
+- char buffer[] used by read() is also static because virtual memory is larger than plain stack one
 - char *strs[] is an fd array of ptrs for storing prev buffers for the multi-fd feature
 - size_t sizes[] store previous buffer length to optimize iterations and memory
 ```C
