@@ -1,29 +1,30 @@
-#include "get_next_line.h"
-#include <fcntl.h>
 #include <stdio.h>
+#include <fcntl.h>
+#include <stdlib.h>
+#include <unistd.h>
 
-int main(int ac, char **av)
+char	*get_next_line(int fd);
+
+int	main(int ac, char **av)
 {
-	int		i;
-	int		fd;
-	char	*str;
+	char		*o;
+	int			fd;
+	static int	i;
 
-	i = 1;
-	while (i < ac)
+	if (ac != 2)
 	{
-		fd = open (av[i], O_RDONLY);
-		while (1)
-		{
-			str = get_next_line(fd);
-
-			if (!str)
-
-				break ;
-			printf("- %s", str);
-			free(str);
-		}
-		i += 1;
+		printf("usage: %s <file>\n", av[0]);
+		return (0);
 	}
-	free(str);
+	fd = open(av[1], O_RDONLY);
+	while (1)
+	{
+		o = get_next_line(fd);
+		if (!o)
+			break ;
+		printf("-- %s", o);
+		free(o);
+	}
+	close(fd);
+	return (0);
 }
-
